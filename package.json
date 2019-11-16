@@ -1,0 +1,30 @@
+{
+  "name": "airplanes-game",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vladpuscaru/airplanes-game.git"
+  },
+  "author": "Vlad Puscaru",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vladpuscaru/airplanes-game/issues"
+  },
+  "homepage": "https://github.com/vladpuscaru/airplanes-game#readme",
+  "dependencies": {
+    "count-files": "^2.6.2",
+    "express": "^4.17.1",
+    "socket.io": "^2.3.0"
+  },
+  "devDependencies": {
+    "browser-sync": "^2.26.7",
+    "gulp": "^3.9.1",
+    "gulp-sass": "^4.0.2"
+  }
+}
