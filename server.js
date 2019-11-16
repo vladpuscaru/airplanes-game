@@ -1,12 +1,25 @@
+'use strict'
 const express = require('express');
 const socket = require('socket.io');
 const fs = require('fs');
 const properties = require('./properties');
 const util = require('./server-assets/lib/util-functions');
 
+/*
+  * Initialize server
+  * -> get the express app in a constant
+  * -> set the middleware for serving static html
+  * -> populate local storage with the map config (app.locals.data)
+  * -> initialize an empty array for player connected (app.locals.players)
+  * -> start the server
+*/
 const app = express();
-
 app.use(express.static('public'));
+
+app.locals.data = util.readRandomMapConfig()
+                  .split('')
+                  .filter(e => e !== '\n' && e !== '\r');
+app.locals.players = [];
 
 const server = app.listen(properties.PORT, () => {
   console.log(`Listening on port ${properties.PORT}...`);
@@ -18,19 +31,34 @@ const io = socket(server);
 
 // initialize listeners
 io.on('connection', (socket) => {
-  // TODO: log connection in a csv file
-  console.log('ws connection made! ->', socket.id);
+  /*
+    * Update server when a new client has connected
+    * -> update the list of connected players
+    * TODO: log connections in a csv file
+  */
+  socket.on('new-client', (data) => {
+    app.locals.players.push(data.playerName);
+    console.log(`${app.locals.players[app.locals.players.length - 1]} has connected!`);
+    /*
+      * Send data to the new client and also alert the other players
+      * -> send the current map configuration
+      * -> send the list of clients already connected
+      * -> broadcast to the other clients the new arriver
+    */
+    socket.emit('map-config', {
+      mapConfig: app.locals.data,
+      players: app.locals.players
+    });
 
-  // send the map structure as an ARRAY
-  // also, keep the map in the locals
-  app.locals.data = util.readRandomMapConfig()
-                    .split('')
-                    .filter(e => e !== '\n' && e !== '\r');
-  socket.emit('map-config', app.locals.data);
+    socket.broadcast.emit('new-arrival', data.playerName);
+  });
+
+
 
   /*
     * Add WebSocket listeners
     * 'cell-click' - receives the index of the cell that was clicked
+    * 'trying-disconnect' - handler when a client disconnects (browser refresh or closed)
     * 
   */
   socket.on('cell-click', (index) => {
@@ -56,7 +84,6 @@ io.on('connection', (socket) => {
     if (util.isLetter(cellValue)) {
       // hit to the head
       value = 'X';
-      planeDestroyed = true;
 
       let planeValue;
       switch (cellValue) {
@@ -85,5 +112,17 @@ io.on('connection', (socket) => {
       value: value,
       indices: indices
     });
+  });
+
+
+  socket.on('trying-disconnect', (playerName) => {
+    /*
+      * Handles the players array when a client disconnects
+      * -> pops the player from the players array
+      * -> broadcast the other still connected players the name of the disconnected one
+    */
+    console.log(playerName + ' disconnected!');
+    app.locals.players = app.locals.players.filter(e => e !== playerName);
+    socket.broadcast.emit('client-disconnected', app.locals.players);
   });
 });

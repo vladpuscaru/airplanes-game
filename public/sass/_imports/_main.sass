@@ -33,6 +33,8 @@ main
     &:hover
       background-color: #FFF
       cursor: pointer
+    &.active
+      pointer-events: none
     &.active.missed
       background: url('../images/missed_shot.jpg')
       background-repeat: no-repeat
@@ -48,3 +50,15 @@ main
   border-bottom: none
   border-top-left-radius: 5px
   border-top-right-radius: 5px
+  background-color: $green
+  overflow-y: scroll
+  .title
+    background-color: $black
+    color: $white
+    height: 10%
+    display: flex
+    justify-content: center
+    align-items: center
+  ul li
+    padding: 5px
+    border-bottom: 1px solid $black

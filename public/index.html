@@ -11,7 +11,9 @@
   integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
   crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.dev.js"></script>
+  <script src="./js/util.js"></script>
   <script src="./js/index.js"></script>
+  <script src="./js/socket.js"></script>
   <title>Airplanes</title>
 </head>
 <body>
@@ -25,7 +27,10 @@
   <main>
     <div class="container container--grid">
       <div id="game"></div>
-      <div id="connected"></div>
+      <div id="connected">
+        <div class="title">Connected</div>
+        <ul></ul>
+      </div>
       <div id="chat"></div>
     </div>
   </main>
@@ -42,6 +47,14 @@
       &copy; Airplanes Game. Vlad Puscaru
     </div>
   </footer>
+
+
+  <div id="logIn">
+    <div class="form">
+      <input id="logIn__name" class="form__input" type="text" placeholder="Enter your name">
+      <button id="logIn__btn" class="form__btn">ENTER</button>
+    </div>
+  </div>
 
 </body>
 </html>

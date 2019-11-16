@@ -1,3 +1,17 @@
+@keyframes inputErrorFlicker {
+  from {
+    background-color: #fff; }
+  to {
+    background-color: #F42B03; } }
+
+.animated {
+  animation-duration: .3s;
+  animation-fill-mode: both; }
+
+.inputErrorFlicker {
+  animation-name: inputErrorFlicker;
+  animation-iteration-count: 3; }
+
 *, *:after, *:before {
   margin: 0;
   padding: 0;
@@ -67,6 +81,8 @@ main {
   .game__cell:hover {
     background-color: #FFF;
     cursor: pointer; }
+  .game__cell.active {
+    pointer-events: none; }
   .game__cell.active.missed {
     background: url("../images/missed_shot.jpg");
     background-repeat: no-repeat;
@@ -81,7 +97,19 @@ main {
   border: 1px solid #1D201F;
   border-bottom: none;
   border-top-left-radius: 5px;
-  border-top-right-radius: 5px; }
+  border-top-right-radius: 5px;
+  background-color: #A2D729;
+  overflow-y: scroll; }
+  #connected .title {
+    background-color: #1D201F;
+    color: #D1DEDE;
+    height: 10%;
+    display: flex;
+    justify-content: center;
+    align-items: center; }
+  #connected ul li {
+    padding: 5px;
+    border-bottom: 1px solid #1D201F; }
 
 footer {
   text-align: center; }
@@ -98,3 +126,40 @@ footer {
     background-color: #000;
     color: #fff;
     padding: 5px; }
+
+#logIn {
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.9);
+  width: 100%;
+  height: calc(100% - 69px);
+  display: flex;
+  justify-content: center;
+  align-items: center; }
+  #logIn.handled {
+    display: none; }
+  #logIn .form {
+    display: flex;
+    flex-direction: column; }
+    #logIn .form__input {
+      padding: 20px;
+      border-top-right-radius: 5px;
+      border-top-left-radius: 5px;
+      border: none;
+      outline: none;
+      font-size: 24px; }
+    #logIn .form__btn {
+      background-color: #A2D729;
+      color: #fff;
+      border: none;
+      border-bottom-right-radius: 5px;
+      border-bottom-left-radius: 5px;
+      font-weight: bold;
+      padding: 20px;
+      transition: all .3s ease-in-out;
+      outline: none; }
+      #logIn .form__btn:hover {
+        background-color: #D1DEDE;
+        color: #1D201F;
+        cursor: pointer; }
