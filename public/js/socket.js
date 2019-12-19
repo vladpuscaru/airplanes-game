@@ -1,104 +1,157 @@
 /*
-  * Make a WebSocket connection with the server
-  * The WebSocket "handshake"
-*/
+ * Make a WebSocket connection with the server
+ * The WebSocket "handshake"
+ */
 function initializeWebSocket(playerName, game, chat, connected) {
-  const socket = io.connect('http://localhost:5000');
+  const socket = io.connect("http://localhost:8080");
 
   /*
-    * One time emits when the client first connects
-    * It sends the name of the player
-  */
-  socket.emit('new-client', {
+   * One time emits when the client first connects
+   * It sends the name of the player
+   */
+  socket.emit("new-client", {
     playerName: playerName
   });
 
   /*
-  * Add WebSocket listeners
-  * 'map-config' -> gets the configuration of the map
-  * 'cell-click-answer' -> receives the answer upon clicking a cell
-  * 'new-arrival' -> receives the name of the newly connected client
-  * 'client-disconnected' -> receives the updated players array and updates the front end
-  * 
-  */
-  socket.on('map-config', (data) => {
+   * Add WebSocket listeners
+   * 'map-config' -> gets the configuration of the map
+   * 'cell-click-answer' -> receives the answer upon clicking a cell
+   * 'new-arrival' -> receives the name of the newly connected client
+   * 'client-disconnected' -> receives the updated players array and updates the front end
+   *
+   */
+  socket.on("map-config", data => {
     /*
-      * Set the HTML structure based on the 
-      * map configuration array received from the server
-    */
+     * Set the HTML structure based on the
+     * map configuration array received from the server
+     */
     let map = getHtmlMapStructure(data.mapConfig);
     game.html(map);
 
     /*
-      * Add click listeners to the newly created cells
-      * When a cell is clicked, the client emits a message to
-      * the server, sending the index of the cell clicked
-    */
+     * Add click listeners to the newly created cells
+     * When a cell is clicked, the client emits a message to
+     * the server, sending the index of the cell clicked
+     */
     cells = $(".game__cell");
-    
+
     $(".game__cell").click(function() {
-      let index = parseInt($(this).attr('id'));
-      socket.emit('cell-click', index);
+      let index = parseInt($(this).attr("id"));
+      socket.emit("cell-click", {
+        index,
+        playerName
+      });
     });
 
     /*
-      * Set the list with the connected players
-      * based on the data received from the server
-    */
-    let players = getHtmlConnectedStructure(data.players);
+     * Set the list with the connected players
+     * based on the data received from the server
+     */
+    console.log(data);
+    let players = getHtmlConnectedStructure(data.players, data.scores);
     connected.html(players);
   });
 
-
-  socket.on('cell-click-answer', (data) => {
+  socket.on("cell-click-answer", data => {
     console.log(JSON.stringify(data));
-    // TODO: status answer bar
     // check the answer
     if (data.value === 0) {
       // no plane was hit
-      // TODO: update the status
-      $("#" + data.cellIndex).addClass('active missed');
+      $("#" + data.cellIndex).addClass("active missed");
     } else if (data.value === 1) {
       // body of a plane was hit
-      // TODO: update the status
-      $("#" + data.cellIndex).addClass('active body');
+      $("#" + data.cellIndex).addClass("active body");
     } else {
       // head of a plane was hit and the plane is destroyed
-      // TODO: update the status
-      $("#" + data.cellIndex).addClass('active head');
-      data.indices.forEach((e) => {
-        $("#" + e).addClass('active body');
+      $("#" + data.cellIndex).addClass("active head");
+      data.indices.forEach(e => {
+        $("#" + e).addClass("active body");
       });
+
+      // update the score
+      $("#" + playerName).html(updatePlayerScore(playerName, data.score));
     }
   });
 
-
-  socket.on('new-arrival', (playerName) => {
-    /*
-      * Update the connected list
-    */
-    connected.append(getHtmlConnectedPlayer(playerName));
+  socket.on("score-update", data => {
+    // update the score
+    $("#" + data.player).html(updatePlayerScore(data.player, data.score));
   });
 
-
-  socket.on('client-disconnected', (playersArray) => {
+  socket.on("new-arrival", data => {
     /*
-      * Update the list with the updated array
-    */
-    connected.html(getHtmlConnectedStructure(playersArray));
+     * Update the connected list
+     */
+    let player = data.playerName;
+    let score = data.score;
+    connected.append(getHtmlConnectedPlayer(player, score));
   });
-  
+
+  socket.on("you-won", time => {
+    gameOver("Congratulations! You won! The game will restart in ...", time);
+  });
+
+  socket.on("game-over", data => {
+    console.log("AM INTRAT");
+    let time = data.time;
+    let playerName = data.playerName;
+    gameOver(
+      "Congratulations to <span id='game-over--name'>" +
+        playerName +
+        "</span> for winning the game! The game will restart in ...",
+      time
+    );
+  });
+
+  socket.on("client-disconnected", data => {
+    /*
+     * Update the list with the updated array
+     */
+    players = data.players;
+    scores = data.scores;
+    connected.html(getHtmlConnectedStructure(players, scores));
+  });
+
+  let chatBox = chat.find(".chat--box");
+  socket.on("chat-message-incoming", data => {
+    /*
+     * Update the chat
+     */
+    chatBox.html(
+      getUpdatedHtmlChatBox(chatBox.html(), data.playerName, data.message)
+    );
+    chatBox.scrollTop(10000000);
+  });
+
   /*
-    * Fires upon refresh/window close
-    * -> sends the server the 'intention' to disconnect (simulation)
-    * -> sends the server the name of the player
-  */
+   * Fires upon refresh/window close
+   * -> sends the server the 'intention' to disconnect (simulation)
+   * -> sends the server the name of the player
+   */
   $(window).on("unload", function() {
-    alert('a');
-    socket.emit('trying-disconnect', playerName);
+    socket.emit("trying-disconnect", playerName);
   });
 
+  /*
+   * Add click listener for the chat send button
+   */
+  let btnSubmit = chat.find("input[type='submit']");
+  let inputChat = chat.find("input[type='text']");
 
+  btnSubmit.click(function(e) {
+    e.preventDefault();
+    if (inputChat.val().length > 0) {
+      let message = inputChat.val();
+      socket.emit("chat-message", {
+        playerName,
+        message
+      });
+      chatBox.html(
+        getUpdatedHtmlChatBox(chatBox.html(), playerName, inputChat.val())
+      );
+      chatBox.scrollTop(10000000);
+      inputChat.val("");
+    }
+  });
 }
-
-

@@ -1,27 +1,27 @@
 /*
-  ** UTILITY Functions used by the client
-  * - getHtmlMapStructure(mapConfigArray)
-  * - getHtmlConnectedStructure(playersArray)
-  * 
-*/
+ ** UTILITY Functions used by the client
+ * - getHtmlMapStructure(mapConfigArray)
+ * - getHtmlConnectedStructure(playersArray)
+ *
+ */
 
 /*
-  * @params:
-  **  - mapConfigArray (array) -> the array with the map configuration
-  *
-  * @return:
-  **  - map (string) -> HTML structure
-*/
+ * @params:
+ **  - mapConfigArray (array) -> the array with the map configuration
+ *
+ * @return:
+ **  - map (string) -> HTML structure
+ */
 function getHtmlMapStructure(mapConfigArray) {
   let map = "";
   mapConfigArray.map((element, index) => {
     if (index % 10 === 0) {
-      map += '<div class="game__row game__row__' + index / 10 % 10 + '">';
+      map += '<div class="game__row game__row__' + ((index / 10) % 10) + '">';
     }
 
     map += '<div id="' + index + '" class="game__cell"></div>';
     if (index !== 0 && index % 10 === 9) {
-      map += '</div>';
+      map += "</div>";
     }
   });
 
@@ -29,27 +29,91 @@ function getHtmlMapStructure(mapConfigArray) {
 }
 
 /*
-  * @params:
-  **  - playersArray (array) -> the array with the names of the players
-  *
-  * @return:
-  **  - players (string) -> HTML structure
-*/
-function getHtmlConnectedStructure(playersArray) {
+ * @params:
+ **  - playersArray (array) -> the array with the names of the players
+ *
+ * @return:
+ **  - players (string) -> HTML structure
+ */
+function getHtmlConnectedStructure(playersArray, scores) {
   let players = "";
-  playersArray.map((playerName) => {
-    players += getHtmlConnectedPlayer(playerName);
+  playersArray.map(playerName => {
+    players += getHtmlConnectedPlayer(playerName, scores[playerName]);
   });
   return players;
 }
 
 /*
-  * @params:
-  **  - playerName (string) -> the name of the player
-  *
-  * @return:
-  **  - (string) -> HTML structure
-*/
-function getHtmlConnectedPlayer(playerName) {
-  return '<li>' + playerName + '</li>';
+ * @params:
+ **  - playerName (string) -> the name of the player
+ *
+ * @return:
+ **  - (string) -> HTML structure
+ */
+function getHtmlConnectedPlayer(playerName, score) {
+  return (
+    "<li id='" +
+    playerName +
+    "'>" +
+    playerName +
+    " | <span class='score'>Score: <strong>" +
+    score +
+    "</strong></span></li>"
+  );
+}
+
+/*
+ * @params:
+ **  - playerName (string) -> the name of the player
+ **  - score (number) -> the new score
+ *
+ * @return:
+ **  - (string) -> HTML structure
+ */
+function updatePlayerScore(playerName, score) {
+  return (
+    playerName +
+    " | <span class='score'>Score: <strong>" +
+    score +
+    "</strong></span>"
+  );
+}
+
+/*
+ * @params:
+ **  - playerName (string) -> the name of the player
+ **  - message (string) -> the new message to be added
+ *
+ * @return:
+ **  - (string) -> HTML structure
+ */
+function getUpdatedHtmlChatBox(chatBoxHtml, playerName, message) {
+  return (
+    chatBoxHtml +
+    "<li><strong>" +
+    playerName +
+    "</strong>: <em>" +
+    message +
+    "</em></li>"
+  );
+}
+
+function gameOver(message, time) {
+  $("#game-over--message").html(
+    message + '<span id="game-over--counter">5</span>'
+  );
+
+  $("#game-over").addClass("active");
+  setTimeout(function() {
+    location.reload();
+    $("#game-over").removeClass("active");
+  }, time);
+
+  let counter = time / 1000;
+  $("#game-over--counter").html(counter);
+
+  setInterval(function() {
+    counter--;
+    $("#game-over--counter").html(counter);
+  }, 1000);
 }

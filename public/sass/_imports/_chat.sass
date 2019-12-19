@@ -1,0 +1,34 @@
+#chat
+  background-color: rgba($green, 0.2)
+  .chat--box
+    height: 80%
+    padding: 5px 15px
+    overflow-y: scroll
+    li
+      list-style: none
+
+  .chat--send
+    height: 20%
+    display: flex
+
+  input
+    height: 100%
+    &:focus
+      outline: none
+
+  input[type="text"]
+    background-color: rgba($black, 0.5)
+    color: $white
+    border: none
+    padding-left: 15px
+    flex: 80%
+
+  input[type="submit"]
+    border: none
+    background-color: rgba($green, 0.5)
+    font-weight: 700
+    flex: 20%
+    transition: all .3s ease-in-out
+    &:hover
+      background-color: rgba($white, 0.5)
+      cursor: pointer    
