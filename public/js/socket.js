@@ -169,9 +169,9 @@ function initializeWebSocket(playerName, game, chat, connected) {
    */
   let btnSubmit = chat.find("input[type='submit']");
   let inputChat = chat.find("input[type='text']");
+  const KEY_ENTER = 13;
 
-  btnSubmit.click(function(e) {
-    e.preventDefault();
+  function sendMessage() {
     if (inputChat.val().length > 0) {
       let message = inputChat.val();
       socket.emit("chat-message", {
@@ -183,6 +183,20 @@ function initializeWebSocket(playerName, game, chat, connected) {
       );
       chatBox.scrollTop(10000000);
       inputChat.val("");
+    }
+  }
+
+  btnSubmit.click(function(e) {
+    e.preventDefault();
+    sendMessage();
+  });
+
+  /*
+   * ENTER to send message to chat
+   */
+  $(window).on("keypress", e => {
+    if (e.which == KEY_ENTER && $("#input-send-message").is(":focus")) {
+      sendMessage();
     }
   });
 }
