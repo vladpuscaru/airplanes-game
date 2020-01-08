@@ -49,7 +49,11 @@ function initializeWebSocket(playerName, game, chat, connected) {
      * Set the list with the connected players
      * based on the data received from the server
      */
-    let players = getHtmlConnectedStructure(data.players, data.scores);
+    let players = getHtmlConnectedStructure(
+      data.players,
+      playerName,
+      data.scores
+    );
     connected.html(players);
   });
 
@@ -89,7 +93,7 @@ function initializeWebSocket(playerName, game, chat, connected) {
      */
     let player = data.playerName;
     let score = data.score;
-    connected.append(getHtmlConnectedPlayer(player, score));
+    connected.append(getHtmlConnectedPlayer(player, playerName, score));
   });
 
   /*
@@ -111,7 +115,7 @@ function initializeWebSocket(playerName, game, chat, connected) {
       });
     });
 
-    connected.html(getHtmlConnectedStructure(players, scores));
+    connected.html(getHtmlConnectedStructure(players, playerName, scores));
     gameRestarted = true;
   });
 
@@ -137,7 +141,7 @@ function initializeWebSocket(playerName, game, chat, connected) {
      */
     players = data.players;
     scores = data.scores;
-    connected.html(getHtmlConnectedStructure(players, scores));
+    connected.html(getHtmlConnectedStructure(players, playerName, scores));
   });
 
   let chatBox = chat.find(".chat--box");

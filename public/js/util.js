@@ -35,10 +35,14 @@ function getHtmlMapStructure(mapConfigArray) {
  * @return:
  **  - players (string) -> HTML structure
  */
-function getHtmlConnectedStructure(playersArray, scores) {
+function getHtmlConnectedStructure(playersArray, myPlayerName, scores) {
   let players = "";
   playersArray.map(playerName => {
-    players += getHtmlConnectedPlayer(playerName, scores[playerName]);
+    players += getHtmlConnectedPlayer(
+      playerName,
+      myPlayerName,
+      scores[playerName]
+    );
   });
   return players;
 }
@@ -50,11 +54,14 @@ function getHtmlConnectedStructure(playersArray, scores) {
  * @return:
  **  - (string) -> HTML structure
  */
-function getHtmlConnectedPlayer(playerName, score) {
+function getHtmlConnectedPlayer(playerName, myPlayerName, score) {
+  console.log(playerName + ", " + myPlayerName + ", " + score);
   return (
     "<li id='" +
     playerName +
-    "'>" +
+    "'" +
+    (playerName === myPlayerName ? " class=" + '"me"' : "") +
+    ">" +
     playerName +
     " | <span class='score'>Score: <strong>" +
     score +

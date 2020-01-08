@@ -110,6 +110,8 @@ main {
   #connected ul li {
     padding: 5px;
     border-bottom: 1px solid #1D201F; }
+    #connected ul li.me {
+      background-color: #D1DEDE; }
 
 footer {
   text-align: center; }
