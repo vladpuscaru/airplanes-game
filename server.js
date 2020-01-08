@@ -16,14 +16,21 @@ const util = require("./server-assets/lib/util-functions");
 const app = express();
 app.use(express.static("public"));
 
-app.locals.data = util
-  .readRandomMapConfig()
-  .split("")
-  .filter(e => e !== "\n" && e !== "\r");
-app.locals.players = [];
-app.locals.scores = {};
+const loadMap = () => {
+  app.locals.data = util
+    .readRandomMapConfig()
+    .split("")
+    .filter(e => e !== "\n" && e !== "\r");
+};
+
+const initLocales = () => {
+  loadMap();
+  app.locals.players = [];
+  app.locals.scores = {};
+};
 
 const server = app.listen(properties.PORT, () => {
+  initLocales();
   console.log(`Listening on port ${properties.PORT}...`);
 });
 
@@ -72,11 +79,32 @@ io.on("connection", socket => {
   function checkIfGameIsOver(playerName) {
     app.locals.players.forEach(e => {
       if (app.locals.scores[e] >= 3) {
-        // someone won
+        // load new map config
+        // and set the scores to 0
+        loadMap();
+        let keys = Object.keys(app.locals.scores);
+        keys.forEach(key => {
+          app.locals.scores[key] = 0;
+        });
+
+        // Restart the game
+        // For the winner
         socket.emit("you-won", properties.WAIT_TIME);
+        socket.emit("restart-game", {
+          mapConfig: app.locals.data,
+          players: app.locals.players,
+          scores: app.locals.scores
+        });
+
+        // For other players
         socket.broadcast.emit("game-over", {
           playerName: playerName,
           time: properties.WAIT_TIME
+        });
+        socket.broadcast.emit("restart-game", {
+          mapConfig: app.locals.data,
+          players: app.locals.players,
+          scores: app.locals.scores
         });
       }
     });

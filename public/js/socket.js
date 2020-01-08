@@ -1,3 +1,4 @@
+let gameRestarted = false;
 /*
  * Make a WebSocket connection with the server
  * The WebSocket "handshake"
@@ -48,13 +49,11 @@ function initializeWebSocket(playerName, game, chat, connected) {
      * Set the list with the connected players
      * based on the data received from the server
      */
-    console.log(data);
     let players = getHtmlConnectedStructure(data.players, data.scores);
     connected.html(players);
   });
 
   socket.on("cell-click-answer", data => {
-    console.log(JSON.stringify(data));
     // check the answer
     if (data.value === 0) {
       // no plane was hit
@@ -68,9 +67,14 @@ function initializeWebSocket(playerName, game, chat, connected) {
       data.indices.forEach(e => {
         $("#" + e).addClass("active body");
       });
+    }
 
-      // update the score
-      $("#" + playerName).html(updatePlayerScore(playerName, data.score));
+    // update the score
+    $("#" + playerName).html(updatePlayerScore(playerName, data.score));
+
+    if (gameRestarted) {
+      $(".game__cell").removeClass("active");
+      gameRestarted = false;
     }
   });
 
@@ -88,14 +92,37 @@ function initializeWebSocket(playerName, game, chat, connected) {
     connected.append(getHtmlConnectedPlayer(player, score));
   });
 
+  /*
+   * Action when the game is finished
+   * Gets the new map config, players and scores
+   * and updates them
+   */
+  socket.on("restart-game", ({ mapConfig, players, scores }) => {
+    let map = getHtmlMapStructure(mapConfig);
+    game.html(map);
+
+    cells = $(".game__cell");
+
+    $(".game__cell").click(function() {
+      let index = parseInt($(this).attr("id"));
+      socket.emit("cell-click", {
+        index,
+        playerName
+      });
+    });
+
+    connected.html(getHtmlConnectedStructure(players, scores));
+    gameRestarted = true;
+  });
+
   socket.on("you-won", time => {
     gameOver("Congratulations! You won! The game will restart in ...", time);
   });
 
   socket.on("game-over", data => {
-    console.log("AM INTRAT");
     let time = data.time;
     let playerName = data.playerName;
+
     gameOver(
       "Congratulations to <span id='game-over--name'>" +
         playerName +

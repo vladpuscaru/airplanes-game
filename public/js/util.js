@@ -98,6 +98,7 @@ function getUpdatedHtmlChatBox(chatBoxHtml, playerName, message) {
   );
 }
 
+// Restarts the game
 function gameOver(message, time) {
   $("#game-over--message").html(
     message + '<span id="game-over--counter">5</span>'
@@ -105,15 +106,16 @@ function gameOver(message, time) {
 
   $("#game-over").addClass("active");
   setTimeout(function() {
-    location.reload();
     $("#game-over").removeClass("active");
+    clearInterval(countDown);
   }, time);
 
   let counter = time / 1000;
   $("#game-over--counter").html(counter);
 
-  setInterval(function() {
+  let countDown = setInterval(function() {
     counter--;
+    console.log("WTF? " + counter);
     $("#game-over--counter").html(counter);
   }, 1000);
 }
